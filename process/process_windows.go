@@ -530,7 +530,7 @@ func AllProcesses() (map[int32]*FilledProcess, error) {
 			CtxSwitches: &NumCtxSwitchesStat{},
 			MemInfo: &MemoryInfoStat{
 				RSS:  pmemcounter.WorkingSetSize,
-				VMS:  pmemcounter.PagefileUsage,
+				VMS:  pmemcounter.QuotaPagedPoolUsage,
 				Swap: 0, // it's unclear there's a Windows measurement of swap file usage
 			},
 			//Cwd

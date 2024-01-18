@@ -84,7 +84,9 @@ func Test_Process_memory_maps(t *testing.T) {
 	checkPid := os.Getpid()
 
 	ret, err := NewProcess(int32(checkPid))
-
+	if err != nil {
+		t.Errorf("new process error %v", err)
+	}
 	mmaps, err := ret.MemoryMaps(false)
 	if err != nil {
 		t.Errorf("memory map get error %v", err)

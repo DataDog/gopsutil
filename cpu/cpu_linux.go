@@ -154,6 +154,10 @@ func Info() ([]InfoStat, error) {
 				val = strings.Split(value, ".")[0]
 			}
 
+			if strings.EqualFold(val, "unknown") {
+				continue
+			}
+
 			t, err := strconv.ParseInt(val, 10, 64)
 			if err != nil {
 				return ret, err

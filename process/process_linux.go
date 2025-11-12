@@ -867,6 +867,9 @@ func (p *Process) fillFromStat() (int32, int32, *cpu.TimesStat, int64, int32, er
 		return 0, 0, nil, 0, 0, err
 	}
 	fields := strings.Fields(string(contents))
+	if len(fields) == 0 {
+		return 0, 0, nil, 0, 0, fmt.Errorf("stat file is empty for pid %d", pid)
+	}
 	timestamp := time.Now().Unix()
 
 	i := 1

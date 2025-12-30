@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package process
@@ -13,10 +14,11 @@ import (
 	"github.com/StackExchange/wmi"
 	"github.com/shirou/w32"
 
+	"log/slog"
+
 	cpu "github.com/DataDog/gopsutil/cpu"
 	"github.com/DataDog/gopsutil/internal/common"
 	net "github.com/DataDog/gopsutil/net"
-	log "github.com/cihub/seelog"
 )
 
 const (
@@ -553,7 +555,7 @@ func get_username_for_process(h syscall.Handle) (name string, err error) {
 	var t syscall.Token
 	err = syscall.OpenProcessToken(h, syscall.TOKEN_QUERY, &t)
 	if err != nil {
-		log.Debugf("Failed to open process token %v", err)
+		slog.Debug("Failed to open process token", "error", err)
 		return
 	}
 	defer t.Close()

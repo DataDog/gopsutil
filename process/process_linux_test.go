@@ -1,12 +1,13 @@
+//go:build linux
 // +build linux
 
 package process
 
 import (
+	"log/slog"
 	"os"
 	"testing"
 
-	log "github.com/cihub/seelog"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,7 +25,7 @@ func BenchmarkLinuxAllProcessesOnPostgresProcFS(b *testing.B) {
 	defer os.Unsetenv("HOST_PROC")
 
 	// Disable logging (as it'll be noisy)
-	log.ReplaceLogger(log.Disabled)
+	slog.SetDefault(slog.New(slog.DiscardHandler))
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -45,7 +46,7 @@ func BenchmarkLinuxAllProcessesOnLocalProcFS(b *testing.B) {
 	errCount := 0
 
 	// Disable logging (as it'll be noisy)
-	log.ReplaceLogger(log.Disabled)
+	slog.SetDefault(slog.New(slog.DiscardHandler))
 
 	b.ReportAllocs()
 	b.ResetTimer()

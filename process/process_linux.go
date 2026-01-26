@@ -6,18 +6,18 @@ package process
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
-
-	log "github.com/cihub/seelog"
 
 	"github.com/DataDog/gopsutil/cpu"
 	"github.com/DataDog/gopsutil/host"
@@ -961,63 +961,63 @@ func AllProcesses() (map[int32]*FilledProcess, error) {
 	for _, pid := range pids {
 		p, err := NewProcess(pid)
 		if err != nil {
-			log.Debugf("Unable to create new process %d, it may have gone away: %s", pid, err)
+			slog.Debug("Unable to create new process, it may have gone away", "pid", pid, "error", err)
 			// Skip the rest of the processing because we have no real process.
 			continue
 		}
 		cmdline, err := p.fillSliceFromCmdline()
 		if err != nil {
-			log.Debugf("Unable to read process command line for %d: %s", pid, err)
+			slog.Debug("Unable to read process command line", "pid", pid, "error", err)
 			cmdline = []string{}
 		}
 		if err := p.fillFromStatus(); err != nil {
-			log.Debugf("Unable to fill from /proc/%d/status: %s", pid, err)
+			slog.Debug("Unable to fill from /proc/PID/status", "pid", pid, "error", err)
 		}
 		memInfo, memInfoEx, err := p.readFromStatm()
 		if err != nil {
-			log.Debugf("Unable to fill from /proc/%d/statm: %s", pid, err)
+			slog.Debug("Unable to fill from /proc/PID/statm", "pid", pid, "error", err)
 			memInfo = &MemoryInfoStat{}
 			memInfoEx = &MemoryInfoExStat{}
 		}
 		ioStat, err := p.fillFromIO(user)
 		if os.IsPermission(err) {
-			log.Tracef("Unable to access /proc/%d/io, permission denied", pid)
+			slog.Log(context.Background(), slog.LevelDebug-4, "Unable to access /proc/PID/io, permission denied", "pid", pid)
 			// Without root permissions we can't read for other processes.
 			ioStat = &IOCountersStat{}
 		} else if err != nil {
-			log.Debugf("Unable to access /proc/%d/io: %s", pid, err)
+			slog.Debug("Unable to access /proc/PID/io", "pid", pid, "error", err)
 			ioStat = &IOCountersStat{}
 		}
 		ppid, _, t1, createTime, nice, err := p.fillFromStat()
 		if err != nil {
-			log.Debugf("Unable to fill from /proc/%d/stat: %s", pid, err)
+			slog.Debug("Unable to fill from /proc/PID/stat", "pid", pid, "error", err)
 			t1 = &cpu.TimesStat{}
 		}
 		cwd, err := p.fillFromCwd(user)
 		if os.IsPermission(err) {
 
-			log.Tracef("Unable to access /proc/%d/cwd, permission denied", pid)
+			slog.Log(context.Background(), slog.LevelDebug-4, "Unable to access /proc/PID/cwd, permission denied", "pid", pid)
 			cwd = ""
 		} else if err != nil {
-			log.Debugf("Unable to access /proc/%d/cwd: %s", pid, err)
+			slog.Debug("Unable to access /proc/PID/cwd", "pid", pid, "error", err)
 			cwd = ""
 		}
 		exe, err := p.fillFromExe(user)
 		if os.IsPermission(err) {
 			// Without root permissions we can't read for other processes.
-			log.Tracef("Unable to access /proc/%d/exe, permission denied", pid)
+			slog.Log(context.Background(), slog.LevelDebug-4, "Unable to access /proc/PID/exe, permission denied", "pid", pid)
 			exe = ""
 		} else if err != nil {
-			log.Debugf("Unable to access /proc/%d/exe: %s", pid, err)
+			slog.Debug("Unable to access /proc/PID/exe", "pid", pid, "error", err)
 			exe = ""
 		}
 		openFdCount := int32(-1)
 		_, fds, err := p.fillFromfdList(user)
 		if os.IsPermission(err) {
 			// Without root permissions we can't read for other processes.
-			log.Tracef("Unable to access /proc/%d/fd, permission denied", pid)
+			slog.Log(context.Background(), slog.LevelDebug-4, "Unable to access /proc/PID/fd, permission denied", "pid", pid)
 		} else if err != nil {
-			log.Debugf("Unable to access /proc/%d/fd: %s", pid, err)
+			slog.Debug("Unable to access /proc/PID/fd", "pid", pid, "error", err)
 		} else {
 			openFdCount = int32(len(fds))
 		}

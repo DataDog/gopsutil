@@ -1,1 +1,2 @@
 *     @DataDog/agent-configuration
+/.github/CODEOWNERS @DataDog/agent-configuration

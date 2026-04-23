@@ -2,6 +2,8 @@ module github.com/DataDog/gopsutil
 
 go 1.24.0
 
+toolchain go1.26.2
+
 require (
 	github.com/StackExchange/wmi v0.0.0-20181212234831-e0a55b97c705
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4

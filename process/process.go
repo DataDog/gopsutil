@@ -43,6 +43,7 @@ type FilledProcess struct {
 	Nice        int32
 	CreateTime  int64
 	OpenFdCount int32
+	LastCpu     int32
 
 	// status
 	Name        string
